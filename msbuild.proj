@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project Toolsversion="4.0"  DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+ <!-- <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" /> -->
+ <Import Project="C:\Program Files\MSBuildExtensionPack\4.0\MSBuild.ExtensionPack.tasks" />
+
+
+  <PropertyGroup>
+     <tpath>$(msbuildextensionspath)\extensionpack\4.0\msbuild.extensionpack.tasks</tpath> 
+    
+  </PropertyGroup>
+ 
+  
+  <PropertyGroup>
+    <WorkingDirectory>C:\Users\Harsh\Desktop\A-Project\gitHub</WorkingDirectory>
+    <SourceFolder>C:\Users\Harsh\Desktop\A-Project\gitHub\WebApplication1</SourceFolder>
+    <SolutionFileName>$(WorkingDirectory)\WebApplication1.sln</SolutionFileName>
+   
+    <BuildConfiguartion>Release</BuildConfiguartion>
+    <DeployFolder>$(WorkingDirectory)\Release\Website</DeployFolder>
+    <DOUBLE_QUOTES>%22</DOUBLE_QUOTES>
+    <ReleaseBackup>C:\Build_Archive_History</ReleaseBackup>
+    <CurrentDate>$([System.DateTime]::Now.ToString(ddMMyyyy))</CurrentDate>
+    <BuildArchive>$(BuildNumber)</BuildArchive>
+    
+  </PropertyGroup>
+
+  <Target Name="Default">
+   <CallTarget Targets="package" ContinueOnError="false" />
+    <CallTarget Targets="CreateDeployFolder" ContinueOnError="false"/>
+  
+   <CallTarget Targets="ZipPkg" ContinueOnError="false"/> 
+	
+  </Target>
+    <Target Name="package" >
+    <Message Text="Compile Code Started...." />
+    <Message Text="Build the Solution for project : $(WorkingDirectory)"></Message>
+    <Message Text="$(BuildConfiguartion)" />
+    <MSBuild Projects="$(SolutionFileName)"  Properties="Configuration=Release;Platform=Any CPU" />
+   <!-- <Exec Command="$(SolutionFileName)&quot; /package &quot;Release|Any CPU"/> -->
+    <Message Text="$(Configuration)" />
+    <Message Text="Compile Code Completed...." />
+  </Target>
+
+  <Target Name="CreateDeployFolder" >
+    <Message Text="CreateDeployFolder Started...." />
+    <MakeDir Directories="$(DeployFolder)\App_Config\Include" />
+    <MakeDir Directories="$(DeployFolder)\Assets" />
+    <MakeDir Directories="$(DeployFolder)\bin" />
+    <MakeDir Directories="$(DeployFolder)\Views" />
+	 <Exec Command="xcopy /E /Y $(SourceFolder)\bin $(DeployFolder)\bin\" />
+  </Target>
+
+ 
+  <Target Name="ZipPkg" >
+    <Message Text="ZipPkg Started...." />
+    <MSBuild.ExtensionPack.Compression.Zip TaskAction="Create" CompressPath="$(DeployFolder)" ZipFileName="$(DeployFolder).zip"/> 
+    <Message Text="ZipPkg Completed...." />
+    <!--  </Target>
+  <Target Name="BuildArchive" DependsOnTargets="ZipPkg">-->
+  <Message Text="Creating Build Archival ............." />
+  <MakeDir Directories="$(ReleaseBackup)\$(CurrentDate)\$(BuildArchive)" />
+  <Exec Command="xcopy /E /Y $(WorkingDirectory)\Release\Website.zip $(ReleaseBackup)\$(CurrentDate)\$(BuildArchive)" /> 
+  <Message Text="$Build Archived on Build Server in $(ReleaseBackup)\$(CurrentDate)\$(BuildArchive)  ............." />
+
+  </Target>
+</Project>
